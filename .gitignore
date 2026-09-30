@@ -48,3 +48,6 @@ ENV/
 screenshots/
 results/
 .claude/
+
+# Arquivos fora da estrutura exigida pelo enunciado (notas e guias locais)
+docs/

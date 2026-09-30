@@ -39,13 +39,50 @@ from utils import save_yaml, check_env_vars, print_section_header
 load_dotenv()
 
 
-def pull_prompts_from_langsmith():
-    ...
+SOURCE_PROMPT = "leonanluppi/bug_to_user_story_v1"
+PROMPT_KEY = "bug_to_user_story_v1"
+OUTPUT_PATH = Path(__file__).parent.parent / "prompts" / "bug_to_user_story_v1.yml"
+
+
+def pull_prompts_from_langsmith() -> bool:
+    """Faz pull do prompt semente e salva em prompts/bug_to_user_story_v1.yml."""
+    try:
+        client = Client()
+        prompt = client.pull_prompt(SOURCE_PROMPT, dangerously_pull_public_prompt=True)
+    except Exception as e:
+        print(f"❌ Erro ao fazer pull de '{SOURCE_PROMPT}': {e}")
+        return False
+
+    templates = {}
+    for message in prompt.messages:
+        role = type(message).__name__.replace("MessagePromptTemplate", "").lower()
+        templates[role] = message.prompt.template
+
+    data = {
+        PROMPT_KEY: {
+            "description": "Prompt para converter relatos de bugs em User Stories",
+            "system_prompt": templates.get("system", ""),
+            "user_prompt": templates.get("human", ""),
+            "version": "v1",
+            "tags": ["bug-analysis", "user-story", "product-management"],
+        }
+    }
+
+    if not save_yaml(data, str(OUTPUT_PATH)):
+        return False
+
+    print(f"✓ Prompt salvo em {OUTPUT_PATH.relative_to(OUTPUT_PATH.parent.parent)}")
+    return True
 
 
 def main():
     """Função principal"""
-    ...
+    print_section_header("Pull de prompts do LangSmith Hub")
+
+    if not check_env_vars(["LANGSMITH_API_KEY"]):
+        return 1
+
+    return 0 if pull_prompts_from_langsmith() else 1
 
 
 if __name__ == "__main__":

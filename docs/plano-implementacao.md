@@ -38,13 +38,14 @@ A numeração dos requisitos segue o README (seção "Requisitos"). Ordem de exe
 - ✅ Validação: `validate_prompt_structure` passa, e o template tem só a variável `bug_report`. Uma frase com `TODOS` reprovava (substring `TODO`) e foi reescrita. Smoke test no Gemini com formato correto.
 - ⏳ **Documentar no README:** quais técnicas foram escolhidas e por quê (entra na seção "Técnicas Aplicadas (Fase 2)").
 
-## Requisito 3: push e avaliação ⏳
+## Requisito 3: push ✅ (conferir visibilidade)
 
-- ⏳ `src/push_prompts.py`:
+- ✅ `src/push_prompts.py`:
   - `validate_prompt(prompt_data)`: reaproveita `validate_prompt_structure` e checa que `{bug_report}` aparece no template.
   - `push_prompt_to_langsmith(prompt_name, prompt_data)`: monta o `ChatPromptTemplate` (system + user) e chama `client.push_prompt(f"{USERNAME_LANGSMITH_HUB}/bug_to_user_story_v2", object=..., is_public=True, description=..., tags=...)`, incluindo as técnicas aplicadas nos metadados. Devolve `True` ou `False`.
   - `main()`: valida `LANGSMITH_API_KEY` e `USERNAME_LANGSMITH_HUB`, carrega o YAML, valida e faz o push.
-- ⏳ Executar `python src/push_prompts.py` e conferir no dashboard do LangSmith que o prompt foi publicado e está **público**.
+- ✅ `python src/push_prompts.py` executado pelo usuário: prompt publicado em `bug_to_user_story_v2` no Hub.
+- ⏳ Conferir no dashboard do LangSmith que o prompt está **público**.
 
 ## Requisito 4: iteração ⏳
 
@@ -84,6 +85,6 @@ Validar com `pytest tests/test_prompts.py`.
 
 1. `python src/pull_prompts.py` ✅
 2. Refatorar o `v2.yml` ✅
-3. `python src/push_prompts.py` ⏳
+3. `python src/push_prompts.py` ✅
 4. `python src/evaluate.py` ⏳ (iterar de 3 a 5 vezes)
 5. `pytest tests/test_prompts.py` ⏳

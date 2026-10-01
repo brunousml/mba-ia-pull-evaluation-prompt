@@ -91,6 +91,38 @@ from langchain_google_genai import ChatGoogleGenerativeAI  # LLM Gemini
 - Você vai precisar de um modelo de LLM para responder e de um modelo de LLM para avaliação. Consulte a documentação oficial do Google para ver os modelos disponíveis.
 - Os limites de requisições gratuitas mudam com frequência. Consulte os limites atuais na documentação oficial do Google.
 
+## Ollama (modelo local)
+
+Não exige API key, não tem rate limit e não gera custo. O `utils.get_llm()` só conhece `openai` e `google`, mas o Ollama expõe uma API compatível com a da OpenAI, então basta usar o provider `openai` apontando para o servidor local:
+
+1. Instale o [Ollama](https://ollama.com), baixe um modelo (`ollama pull <modelo>`) e confirme com `ollama list`.
+2. No `.env`:
+
+```
+LLM_PROVIDER=openai
+OPENAI_API_KEY=ollama                       # qualquer valor, o Ollama ignora
+OPENAI_BASE_URL=http://localhost:11434/v1
+LLM_MODEL=<modelo do ollama list>
+EVAL_MODEL=<modelo do ollama list>
+```
+
+**Recursos necessários** (medidos com `qwen3.8:27b-mlx`, em um Apple M2 Ultra com 64 GB de memória unificada):
+
+| Item | Valor |
+|---|---|
+| Disco | ~18 GB para o modelo (`qwen3.8:27b-mxfp8` ocupa ~31 GB) |
+| Memória com o modelo carregado | ~21 GB (Ollama reportou 20,6 GB) |
+| Memória recomendada | 32 GB ou mais, deixando folga para o sistema, o Python e o IDE |
+| Plataforma | os modelos `-mlx` rodam em Mac com Apple Silicon |
+
+- A mesma instância serve para gerar e para julgar (`LLM_MODEL` = `EVAL_MODEL`), então só um modelo fica carregado. Usar dois modelos diferentes soma a memória dos dois.
+- Esses números são de uma máquina específica, e não um mínimo testado em hardware menor. Com menos memória, escolha um modelo menor (7B a 14B, por exemplo), sabendo que a qualidade como juiz tende a cair.
+- Sem GPU ou Apple Silicon, o modelo roda na CPU e fica muito mais lento. São 60 chamadas por avaliação.
+
+- Para voltar ao Gemini ou à OpenAI, remova `OPENAI_BASE_URL` e restaure `LLM_PROVIDER`, `LLM_MODEL` e `EVAL_MODEL`.
+- Um modelo local costuma ser mais lento e julga com outra régua que o Gemini. Registre no README final quais modelos foram usados.
+- Modelos de raciocínio podem emitir `<think>...</think>` na resposta, o que pode baixar as notas.
+
 ## Escolha dos modelos
 
 Este desafio não fixa modelos. Nomes e versões mudam com frequência e alguns são descontinuados, então faz parte do desafio consultar a documentação oficial do provedor que você escolher, ver quais modelos estão disponíveis no momento e selecionar os que atendem ao objetivo. Você pode usar o mesmo modelo para responder e para avaliar, ou um modelo mais capaz na avaliação.

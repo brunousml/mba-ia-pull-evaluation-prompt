@@ -35,16 +35,28 @@ bug_to_user_story_v2:
       nem critérios sobre algo que o relato não cita (outras versões, outros navegadores, console, ícones, etc.).
 
     Para bugs MÉDIOS, acrescente ao final:
-    - A seção "Contexto Técnico:" com os dados do relato (endpoint, erro, logs, passos, valores atuais e esperados).
-    - Inclua uma sugestão de causa ou correção, em uma linha, SOMENTE se o relato apontar a causa.
-      Não proponha soluções por conta própria (cache, retry, índice, fila, processamento assíncrono, etc.).
+    - Critérios de Aceitação com 4 a 7 itens, cobrindo o comportamento corrigido e também o que um revisor
+      esperaria junto dele: mensagem clara ao usuário quando algo é bloqueado ou falha, o caso do dono
+      do dado ou perfil legítimo continuar funcionando, e registro (log/auditoria) quando o bug envolve
+      segurança, permissão ou dinheiro. Em bugs de interface, inclua teclado/acessibilidade se fizer sentido.
+    - A seção "Contexto Técnico:" com os dados do relato (endpoint, erro, logs, passos, valores atuais e
+      esperados), a causa provável e a CORREÇÃO TÉCNICA SUGERIDA de forma concreta (por exemplo: ajustar
+      z-index, validar permissão em middleware, índice na coluna filtrada, paginação). Se o relato indicar
+      a gravidade ou a natureza do problema (segurança, perda de dinheiro), registre-a.
+    - Sugestões são recomendações, não fatos. Nunca invente números, versões ou métricas que não estejam no relato.
 
     Para bugs COMPLEXOS (vários problemas):
     - Uma frase inicial "Como um [perfil], eu quero [necessidade geral], para que [benefício geral]."
     - "=== USER STORY PRINCIPAL ===" com Título e Descrição.
     - "=== CRITÉRIOS DE ACEITAÇÃO ===" com um bloco por problema (A., B., C.), cada um com
       Dado/Quando/Então/E.
-    - "=== CRITÉRIOS TÉCNICOS ===" com as abordagens técnicas sugeridas por problema.
+    - "=== CRITÉRIOS TÉCNICOS ===" com a solução técnica concreta sugerida para CADA problema
+      (mecanismo, padrão ou ferramenta), não apenas a descrição do problema.
+    - "=== CONTEXTO DO BUG ===" com os problemas identificados, componentes afetados e dados do relato.
+    - "=== TASKS TÉCNICAS SUGERIDAS ===" com as tarefas agrupadas em fases por prioridade
+      (ex.: Fase 1 - correção urgente; Fase 2 - correções principais; Fase 3 - robustez), cobrindo
+      todos os problemas. Não invente prazos nem números que não estejam no relato.
+    - "=== MÉTRICAS DE SUCESSO ===" com como medir o antes e o depois, reaproveitando os números do relato.
     - "=== CONTEXTO DO NEGÓCIO ===" com o impacto relatado (números, perfis afetados, urgência).
 
     ## Regras de comportamento
@@ -57,8 +69,10 @@ bug_to_user_story_v2:
       e não repetir "corrigir o bug".
     - Critérios de aceitação devem ser específicos e testáveis. Reaproveite números, IDs, endpoints,
       navegadores e mensagens do relato. Nunca invente dados que não estejam nele.
-    - Não acrescente critérios, cenários, navegadores, versões, etapas do fluxo ou soluções que o relato não
-      mencione: cada critério deve ter origem em algo escrito nele. Prefira poucos critérios objetivos.
+    - Em bugs SIMPLES, não acrescente critérios, cenários, navegadores, versões, etapas do fluxo ou soluções
+      que o relato não mencione: cada critério deve ter origem em algo escrito nele.
+    - O "Como um" e o critério de aceitação devem tratar o comportamento correto de forma geral, e não
+      apenas repetir o cenário do bug.
     - No "para que", escreva o benefício em uma só ideia, sem frases de efeito nem repetição do "eu quero".
     - Cubra cada um dos problemas do relato, sem exceção. Não resuma vários problemas em um só.
     - Não ofereça soluções de implementação como se fossem fatos. Sugestões técnicas só em
@@ -105,10 +119,15 @@ bug_to_user_story_v2:
     - Então a exportação deve ser concluída sem erro de timeout
     - E devo receber o arquivo completo com todas as notas
     - E devo ser avisado do andamento caso o processamento demore
+    - E, se a exportação falhar, devo ver uma mensagem clara explicando o que fazer, sem perder o filtro aplicado
+    - E contas com poucas notas devem continuar exportando como antes
 
     Contexto Técnico:
     - Erro registrado: "TimeoutError: export job exceeded 60s"
     - Ocorre apenas no plano Enterprise, com mais de 500 notas
+    - Causa provável: o job de exportação gera todo o PDF de forma síncrona e estoura o limite de 60s
+    - Correção sugerida: processar a exportação em segundo plano (fila), gerar o arquivo em partes e
+      notificar o usuário quando estiver pronto; avaliar elevar o limite apenas como paliativo
 
     ### Exemplo 3 (complexo)
     Relato de Bug:
@@ -148,6 +167,27 @@ bug_to_user_story_v2:
 
     Localização:
     - Armazenar as posições localmente durante a desconexão e enviá-las em lote, ordenadas por horário
+
+    === CONTEXTO DO BUG ===
+    - Problema 1: status do pedido atrasa até 20 minutos
+    - Problema 2: localização do entregador congela e volta ao ponto anterior ao reconectar
+    - Componentes afetados: app do cliente, serviço de status do pedido, rastreamento do entregador
+
+    === TASKS TÉCNICAS SUGERIDAS ===
+
+    Fase 1 - Correção urgente:
+    - Investigar o atraso na propagação do status e reduzir o intervalo de consulta como paliativo
+
+    Fase 2 - Correções principais:
+    - Implementar atualização de status via push
+    - Implementar buffer local de posições com envio ordenado ao reconectar
+
+    Fase 3 - Robustez:
+    - Exibir aviso de localização desatualizada e cobrir os cenários com testes de desconexão
+
+    === MÉTRICAS DE SUCESSO ===
+    - Reclamações por status desatualizado: de 120 por semana para uma queda significativa
+    - Tempo entre a mudança de etapa e a exibição ao cliente: de até 20 minutos para poucos segundos
 
     === CONTEXTO DO NEGÓCIO ===
     - 120 reclamações na última semana sobre status desatualizado

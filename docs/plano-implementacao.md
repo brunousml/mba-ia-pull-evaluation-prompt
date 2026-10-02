@@ -1,6 +1,6 @@
 # Plano de implementação (alinhado ao README)
 
-Legenda: ✅ feito · ⏳ pendente
+Legenda: ✅ feito · 🔄 em andamento · ⏳ pendente · ❌ falhou
 
 A numeração dos requisitos segue o README (seção "Requisitos"). Ordem de execução do README: pull, refatorar o prompt, push, avaliar.
 
@@ -11,12 +11,12 @@ A numeração dos requisitos segue o README (seção "Requisitos"). Ordem de exe
 - **Estrutura do repositório:** `.env.example`, `requirements.txt`, `README.md`, `prompts/`, `datasets/`, `src/`, `tests/`. Tudo o que está fora disso fica no `.gitignore` (já inclui `screenshots/`, `.idea/`, `.claude/`, `.env` e `venv/`), com exceção de `docs/`, que é versionada como documentação de apoio.
 - **Entrega:** repositório público no GitHub (fork do repositório base).
 - **Aprovação:** as 5 métricas ≥ 0.8, **cada uma**, e a média ≥ 0.8.
-- **Modelos:** o desafio não fixa modelos. Aqui o plano é manter tudo no plano free do Gemini.
+- **Modelos:** o desafio não fixa modelos. O Gemini free foi descartado (ver Requisito 4) e a avaliação usa o Ollama local (`qwen3.8:27b-mlx`).
 
 ## Setup de ambiente ✅
 
 - ✅ Virtualenv `venv/` e dependências do `requirements.txt` instaladas (Python 3.14).
-- ✅ `.env` criado a partir do `.env.example`: provider `google`, `LLM_MODEL` e `EVAL_MODEL` em `gemini-3.5-flash-lite`, e `GOOGLE_API_KEY`, `LANGSMITH_API_KEY` e `USERNAME_LANGSMITH_HUB` preenchidos. `OPENAI_API_KEY` fica vazia, sem problema com o provider `google`.
+- ✅ `.env` criado a partir do `.env.example`. Modo atual: **Ollama local** (`LLM_PROVIDER=openai`, `OPENAI_BASE_URL=http://localhost:11434/v1`, `OPENAI_API_KEY=ollama`, `LLM_MODEL` e `EVAL_MODEL` em `qwen3.8:27b-mlx`). As linhas do Gemini ficaram comentadas com `# [modo Gemini]`, com instrução para voltar no próprio arquivo.
 - ✅ Handle do LangSmith Hub criado (passo a passo com screenshots em `docs/langsmith-hub-username.md`).
 - ✅ IntelliJ configurado com a venv (SDK Python 3.14, `src/` como source root, `tests/` como testes, pytest).
 - ✅ Plugins `claude-hud` (statusline, um item por linha) e `claude-mem` instalados.
@@ -47,12 +47,17 @@ A numeração dos requisitos segue o README (seção "Requisitos"). Ordem de exe
 - ✅ `python src/push_prompts.py` executado pelo usuário: prompt publicado em `bug_to_user_story_v2` no Hub.
 - ⏳ Conferir no dashboard do LangSmith que o prompt está **público**.
 
-## Requisito 4: iteração ⏳
+## Requisito 4: iteração 🔄 (1ª rodada aprovada, falta confirmar estabilidade)
 
-- ⏳ Rodar `python src/evaluate.py`: cada execução cria um experimento no dataset `{LANGSMITH_PROJECT}-eval`, com as 5 notas gravadas como feedback.
-- ⏳ Repetir de 3 a 5 iterações (analisar notas baixas, editar o `v2`, novo push, nova avaliação) até **todas** as métricas ≥ 0.8.
-- **Atenção ao Gemini free:** o limite é de poucas requisições por minuto e são 15 exemplos com 3 juízes cada, então espere rate limit e execuções lentas.
-- **Risco aberto:** com o Gemini, `response.content` chega como lista de blocos (com um campo `signature`), e o `build_target` do `evaluate.py` a passa direto como `answer`. Pode confundir os juízes e derrubar notas sem relação com o prompt. Como `evaluate.py` não pode ser alterado, primeiro rodar e medir. Se as notas forem afetadas, resolver só pelo lado permitido (prompt, `.env`, escolha de modelo) e documentar no README.
+- ✅ Funcionamento documentado em `docs/como-funciona-a-avaliacao.md`.
+- ❌ **Rodada 1 (Gemini `gemini-3.5-flash-lite`): todas as notas 0.00.** O `response.content` chega como lista de blocos e o `metrics.py` o passa ao `json.loads`, que falha (`the JSON object must be str, bytes or bytearray, not list`). Os 3 juízes caem no `except` e devolvem 0.0. Como `evaluate.py` e `metrics.py` não podem ser alterados, a saída foi trocar de modelo.
+- ✅ **Rodada 2 (Ollama `qwen3.8:27b-mlx`, gerador e juiz): APROVADO.** A API compatível com a OpenAI devolve `content` como string, então o problema some. Notas: Helpfulness 0.81, Correctness 0.80, F1 0.80, Clarity 0.82, Precision 0.80, **média 0.8068**. Prompt v2 sem alterações em relação ao push inicial.
+- **Configuração:** provider `openai` apontando para o Ollama, via `.env` (ver Setup). Documentada no README e no `.env.example`, com os recursos necessários (~18 GB de disco, ~21 GB de memória).
+- ✅ **3 rodadas extras (Ollama):** média das 3 = Helpfulness 0.813, Correctness 0.803, F1 0.803, Clarity 0.820, Precision 0.807, **média geral 0.809**. Rodadas: 0.8119 (reprovada por F1 < 0.8), 0.8090 e 0.8057 (aprovadas). Das 4 execuções, 3 aprovaram. Margem de ~0.003, do tamanho da variação entre rodadas (~0.01).
+- ✅ **Análise dos comentários dos juízes e ajustes propostos** em `docs/analise-avaliacao-v2.md`. Padrões: elaboração além do relato, persona diferente da esperada, meta trocada pelo sintoma, bug complexo sem seções de tasks e métricas.
+- ⏳ **Aplicar os ajustes A1 a A4** no `v2.yml` (e A5 a A8 se necessário), `push_prompts.py`, e rodar 3 avaliações para comparar com a média 0.809.
+- ⏳ Guardar o link do experimento e screenshots das notas, para o README.
+- **Observação:** o log mostra `Erro ao parsear JSONL ... line 1 column 2` na leitura local do `datasets/bug_to_user_story.jsonl` (arquivo que não pode ser alterado). Não afetou a nota, porque o dataset `{LANGSMITH_PROJECT}-eval` já existia no LangSmith com os 15 exemplos. Só atrapalharia quem recriasse o dataset do zero.
 
 ## Requisito 5: testes de validação ⏳
 
@@ -71,7 +76,7 @@ Validar com `pytest tests/test_prompts.py`.
 
 - ⏳ **README.md** com as três seções exigidas:
   - **A) Técnicas Aplicadas (Fase 2):** técnicas escolhidas, justificativa e exemplos práticos de cada uma.
-  - **B) Resultados Finais:** link público do dataset de avaliação, screenshots com as notas ≥ 0.8, e comparação v1 vs v2 (o que mudou e por quê).
+  - **B) Resultados Finais:** link público do dataset de avaliação, screenshots com as notas ≥ 0.8, e comparação v1 vs v2 (o que mudou e por quê). Registrar também por que o Gemini foi trocado pelo Ollama e quais modelos foram usados.
   - **C) Como Executar:** pré-requisitos, dependências e comandos de cada fase.
 - ⏳ **Evidências no LangSmith:**
   - Dataset de avaliação com 15 exemplos.
@@ -86,5 +91,5 @@ Validar com `pytest tests/test_prompts.py`.
 1. `python src/pull_prompts.py` ✅
 2. Refatorar o `v2.yml` ✅
 3. `python src/push_prompts.py` ✅
-4. `python src/evaluate.py` ⏳ (iterar de 3 a 5 vezes)
+4. `python src/evaluate.py` 🔄 (1ª rodada com Ollama aprovada, falta confirmar estabilidade)
 5. `pytest tests/test_prompts.py` ⏳

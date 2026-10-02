@@ -92,7 +92,63 @@ Cada ajuste mira um padrão. São mudanças de texto no system prompt, sem alter
 - **Juiz local ruidoso.** A variação entre rodadas é de ~0.01. Para comparar v2 antes e depois, rodar 3 vezes cada e comparar as médias, sem decidir por uma única execução.
 - **Ordem dos exemplos.** O LangSmith lista os exemplos em ordem diferente do log do terminal. Os nomes da seção 2 vêm do conteúdo do relato, não do índice impresso.
 
-## 6. Próximos passos
+## 6. Resultado da iteração 1 (ajustes A1 a A4 aplicados)
+
+Prompt: `v2` com A1 a A4, publicado no Hub (commit `4427df5`). Mesmo modelo e mesmo dataset. Três rodadas, sem `❌ Erro` nos logs.
+
+| Métrica | Antes (média 3 rodadas) | b1 | b2 | b3 | Depois (média 3 rodadas) | Variação |
+|---|---|---|---|---|---|---|
+| Helpfulness | 0.813 | 0.85 | 0.84 | 0.84 | **0.843** | +0.030 |
+| Correctness | 0.803 | 0.80 | 0.79 ✗ | 0.79 ✗ | **0.793** | -0.010 |
+| F1-Score | 0.803 | 0.76 ✗ | 0.75 ✗ | 0.74 ✗ | **0.750** | -0.053 |
+| Clarity | 0.820 | 0.84 | 0.84 | 0.85 | **0.843** | +0.023 |
+| Precision | 0.807 | 0.85 | 0.84 | 0.84 | **0.843** | +0.036 |
+| Média geral | 0.809 | 0.8195 | 0.8136 | 0.8144 | **0.816** | +0.007 |
+| Status | 2 de 3 aprovadas | ❌ | ❌ | ❌ | **3 de 3 reprovadas** | |
+
+Experimentos no LangSmith: `brunousml-bug_to_user_story_v2-ad510503` (b1), `-7d9711e6` (b2) e `-121da779` (b3).
+
+**Conclusão: a iteração 1 reprovou.** Precision, Clarity e Helpfulness subiram de forma consistente (+0.02 a +0.04), como previsto, mas F1 caiu 0.053 e levou Correctness junto. A média geral subiu levemente, mas a regra exige **cada** métrica ≥ 0.8. Esta versão é pior que a anterior para a aprovação.
+
+### Efeito por exemplo (F1, média antes → depois)
+
+| Exemplo | Tipo | F1 | Precision | Clarity |
+|---|---|---|---|---|
+| Webhook de pagamento | médio | 0.66 → **0.80** | 0.63 → 0.80 | 0.75 → 0.80 |
+| Imagens no Safari | simples | 0.82 → 0.77 | 0.75 → 0.83 | 0.80 → 0.87 |
+| Layout iOS landscape | simples | 0.88 → **0.95** | 0.89 → 0.98 | 0.86 → 0.91 |
+| Campo de e-mail sem `@` | simples | 0.80 → 0.84 | 0.78 → 0.85 | 0.79 → 0.87 |
+| Relato simples de 63 caracteres | simples | 0.89 → 0.94 | 0.79 → 0.95 | 0.85 → 0.94 |
+| Relato simples de 85 caracteres | simples | 0.80 → **0.63** | 0.77 → 0.75 | 0.78 → 0.87 |
+| Notificações Android (ANR) | médio | 0.95 → **0.76** | 0.90 → 0.80 | 0.79 → 0.78 |
+| Carrinho com produto sem estoque | médio | 0.79 → **0.62** | 0.88 → 0.80 | 0.85 → 0.81 |
+| Outro médio (relato de ~304 caracteres) | médio | 0.90 → **0.74** | 0.78 → 0.82 | 0.83 → 0.80 |
+| Checkout com falhas críticas | complexo | 0.83 → **0.67** | 0.89 → 0.89 | 0.87 → 0.82 |
+| App offline-first | complexo | 0.69 → 0.63 | 0.79 → 0.83 | 0.82 → 0.83 |
+
+Os ajustes **funcionaram onde mirei**: o webhook (persona e adições, A1/A4) e os bugs simples (A1/A2) melhoraram. As perdas se concentram nos **médios e complexos**, com uma exceção: um relato simples de 85 caracteres também perdeu F1 (0.80 → 0.63), que não investiguei.
+
+### Por que o F1 caiu (comentários dos juízes)
+
+F1 mede também **recall**: o que a referência traz e a resposta omite. Os comentários mostram o mesmo padrão nos médios e complexos:
+
+- **Notificações Android:** faltam "20 itens por vez", "ViewHolder pattern" e "scroll infinito" (sugestões técnicas da referência).
+- **Carrinho sem estoque:** faltam "mensagem de indisponibilidade ao usuário", "sugestão de remover item", "validação em tempo real" e a seção inteira de **prevenção** (aviso de estoque limitado, reserva de 15 minutos).
+- **Checkout complexo:** faltam retry com backoff, circuit breaker, DOMPurify, CSP, `SELECT FOR UPDATE`, idempotency key, logs estruturados e a **seção de tasks técnicas**.
+
+Hipótese (a confirmar com a próxima iteração): **A3** foi a principal causa. Ela proíbe sugestão de causa ou correção no "Contexto Técnico" salvo se o relato citar a causa, e as referências desses exemplos são justamente ricas em sugestões técnicas e em critérios de prevenção. A1 ("não acrescente nada que o relato não mencione") reforça o corte. É um trade-off Precision × Recall: o prompt agora acerta mais do que escreve, mas escreve menos do que a referência espera. Não testei A3 isoladamente, então o peso de cada ajuste na queda não está medido.
+
+## 7. Próximos passos (iteração 2, proposta)
+
+1. **Relaxar A3** para bugs médios: voltar a permitir sugestões técnicas no "Contexto Técnico", em formato de lista curta de "Sugestões" (abordagem, limites, boas práticas relacionadas ao problema relatado), mantendo a proibição de **inventar números e fatos**.
+2. **Manter A1 (versão enxuta), A2 e A4**, que melhoraram Precision, Clarity e os bugs simples. Restringir A1 aos critérios de aceitação dos bugs simples, para não podar as seções técnicas dos médios e complexos.
+3. **Aplicar A6 e A7** para os complexos: seções `=== TASKS TÉCNICAS SUGERIDAS ===` (em fases) e `=== MÉTRICAS DE SUCESSO ===`, números só do relato. É o maior buraco de recall do checkout e do offline-first.
+4. Para os médios, acrescentar um bloco curto de **prevenção ou validação** quando o relato descreve falha de regra de negócio (ex.: estoque), com instruções para feedback ao usuário. Cuidado: copiar elementos específicos das referências seria overfitting, então a regra deve ser geral.
+5. Publicar, rodar 3 avaliações e comparar com as duas médias anteriores (0.809 e 0.816). Se F1 ficar ≥ 0.80 sem perder Precision, parar aqui.
+
+**Estado atual do Hub:** o prompt publicado em `brunousml/bug_to_user_story_v2` é a versão da iteração 1 (reprovada). A versão da linha de base (aprovada em 2 de 3) está no commit `d13e0de`, e a iteração 1 no `4427df5`. Se a entrega fosse hoje, seria melhor reverter para a linha de base.
+
+## 8. Próximos passos originais (superados)
 
 1. Aplicar A1 a A4 no `v2.yml`, fazer push, rodar 3 avaliações e comparar com a média 0.809 acima.
 2. Se F1 ou Precision ficarem abaixo de 0.82 de média, aplicar A5 a A8 e repetir.

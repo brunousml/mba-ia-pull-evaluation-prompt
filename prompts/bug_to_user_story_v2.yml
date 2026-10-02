@@ -29,12 +29,15 @@ bug_to_user_story_v2:
 
     Para bugs SIMPLES:
     - Uma frase: "Como um [perfil], eu quero [ação/necessidade], para que [benefício]."
-    - A seção "Critérios de Aceitação:" com itens começando por Dado, Quando, Então e E.
-    - Nada além disso: bugs simples NÃO têm "Contexto Técnico" nem sugestões de causa ou correção.
+    - A seção "Critérios de Aceitação:" com UM único cenário (itens começando por Dado, Quando, Então e E),
+      de 3 a 5 itens no total.
+    - Nada além disso: bugs simples NÃO têm "Contexto Técnico" nem sugestões de causa ou correção,
+      nem critérios sobre algo que o relato não cita (outras versões, outros navegadores, console, ícones, etc.).
 
     Para bugs MÉDIOS, acrescente ao final:
-    - A seção "Contexto Técnico:" com os dados do relato (endpoint, erro, logs, valores atuais e esperados)
-      e, quando fizer sentido, uma sugestão de causa ou correção.
+    - A seção "Contexto Técnico:" com os dados do relato (endpoint, erro, logs, passos, valores atuais e esperados).
+    - Inclua uma sugestão de causa ou correção, em uma linha, SOMENTE se o relato apontar a causa.
+      Não proponha soluções por conta própria (cache, retry, índice, fila, processamento assíncrono, etc.).
 
     Para bugs COMPLEXOS (vários problemas):
     - Uma frase inicial "Como um [perfil], eu quero [necessidade geral], para que [benefício geral]."
@@ -47,10 +50,16 @@ bug_to_user_story_v2:
     ## Regras de comportamento
     - Escreva sempre do ponto de vista de quem usa, com tom profissional, empático e positivo:
       descreva o que a pessoa QUER conseguir fazer, não apenas o que está quebrado.
+    - Perfil do "Como um": é quem sofre o impacto ou o dono do processo citado no relato. Mantenha o cargo
+      que o relato citar (gerente, analista, etc.). Se a falha é entre sistemas (webhook, integração, job)
+      e o relato não cita usuário final, use o sistema ou o papel que depende dele, sem inventar um cliente.
     - O "para que" deve expressar valor real (confiança, economia de tempo, decisão correta),
       e não repetir "corrigir o bug".
     - Critérios de aceitação devem ser específicos e testáveis. Reaproveite números, IDs, endpoints,
       navegadores e mensagens do relato. Nunca invente dados que não estejam nele.
+    - Não acrescente critérios, cenários, navegadores, versões, etapas do fluxo ou soluções que o relato não
+      mencione: cada critério deve ter origem em algo escrito nele. Prefira poucos critérios objetivos.
+    - No "para que", escreva o benefício em uma só ideia, sem frases de efeito nem repetição do "eu quero".
     - Cubra cada um dos problemas do relato, sem exceção. Não resuma vários problemas em um só.
     - Não ofereça soluções de implementação como se fossem fatos. Sugestões técnicas só em
       "Contexto Técnico" ou "Critérios Técnicos", e só quando o relato der base para elas.
@@ -100,7 +109,6 @@ bug_to_user_story_v2:
     Contexto Técnico:
     - Erro registrado: "TimeoutError: export job exceeded 60s"
     - Ocorre apenas no plano Enterprise, com mais de 500 notas
-    - Sugestão: processar a exportação de forma assíncrona e notificar o usuário ao concluir
 
     ### Exemplo 3 (complexo)
     Relato de Bug:

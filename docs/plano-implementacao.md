@@ -98,7 +98,8 @@ Validar com `pytest tests/test_prompts.py`.
   - Como foi gerado: `Client().share_dataset(dataset_name="<LANGSMITH_PROJECT>-eval")["url"]`. Original do plano: `Client().share_dataset(dataset_name="<LANGSMITH_PROJECT>-eval")["url"]`. Rodar uma vez e guardar o endereço, porque o link muda a cada compartilhamento.
 - ✅ **Screenshot** da tabela de experimentos do dataset público, tirado com o Chrome em modo headless (o Claude in Chrome não estava conectado): `docs/img/dataset-publico.png`, referenciado no README. Sem e-mail nem ID da organização visíveis. Não há screenshot de traces por exemplo.
 - ✅ **Push feito** (branch `docs/adiciona-documentacao` em dia com a origin, último commit `4cde0b0`).
-- ⏳ **Repositório público** com todo o código, o `v2.yml` completo e o README atualizado.
+- ✅ **Repositório público** (confirmado em 3 out 2026: HTTP 200 sem login para o repositório e a branch). Falta publicar a `main`, que na origin ainda está em `0ca50a1`; o merge local é fast-forward da branch `docs/adiciona-documentacao`.
+- ✅ Código, `v2.yml` e README atualizados, na branch e na `main` local.
 - **Cuidado com screenshots:** as imagens do LangSmith mostram e-mail e ID da organização na barra lateral. Recortar ou borrar antes de colocá-las no README, que é público.
 
 ## Ordem de execução (README)

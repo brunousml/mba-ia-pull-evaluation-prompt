@@ -16,7 +16,7 @@ src/
   push_prompts.py         # Push ao LangSmith
   evaluate.py, metrics.py, utils.py  # Avaliação (já vinham prontos)
 tests/test_prompts.py     # Testes de validação do prompt v2
-docs/                     # Análises e plano de implementação
+screenshots/              # Evidência das avaliações no LangSmith
 ```
 
 ## A) Técnicas Aplicadas (Fase 2)
@@ -88,7 +88,7 @@ Com o juiz local, mais rigoroso, o v2 ficou na margem da aprovação, e duas ten
 | Iteração 1 (ajustes A1 a A4) | 0.816 | Reprovou nas 3: F1 caiu para 0.750 |
 | Iteração 2 (A3 relaxado, seções de tasks e métricas) | 0.795 | Reprovou nas 3: Precision caiu para ~0.780 |
 
-A análise dos comentários dos juízes está em `docs/analise-avaliacao-v2.md`. O padrão foi um trade-off entre Precision e Recall: cortar o que o relato não cita sobe a Precision e derruba o F1, e o contrário também vale. O prompt atual (iteração 2) é o que aprova com folga no juiz Gemini; no juiz Ollama a versão mais estável foi a base.
+Os comentários dos juízes em cada exemplo, lidos no LangSmith, mostraram o padrão: um trade-off entre Precision e Recall: cortar o que o relato não cita sobe a Precision e derruba o F1, e o contrário também vale. O prompt atual (iteração 2) é o que aprova com folga no juiz Gemini; no juiz Ollama a versão mais estável foi a base.
 
 ### Comparação v1 × v2
 
@@ -109,9 +109,9 @@ A análise dos comentários dos juízes está em `docs/analise-avaliacao-v2.md`.
 - Link público do dataset (15 exemplos e os experimentos): https://smith.langchain.com/public/38a6af54-346e-40a0-bc0a-8997dc790cf8/d
   - O link expõe todos os experimentos do dataset, inclusive os reprovados (Ollama, iterações 1 e 2) e a rodada 3 do Gemini, inválida por limite de gasto (`feb6084d-5c71-4a22-a971-c22425ced9da`).
 - Prompt público no Hub: `brunousml/bug_to_user_story_v2`.
-- Screenshot da tabela de experimentos do dataset público (`docs/img/dataset-publico.png`):
+- Screenshot da tabela de experimentos do dataset público (`screenshots/dataset-publico.png`):
 
-  ![Experimentos no dataset público](docs/img/dataset-publico.png)
+  ![Experimentos no dataset público](screenshots/dataset-publico.png)
 
   - **#17 e #18** são as rodadas válidas do v2 com Gemini (médias 0.9295 e 0.9240, todas as métricas ≥ 0.8). O revision `4df0a28` é o commit do prompt avaliado; o `f854604-dirty` do #18 é só o estado do repositório na hora da execução, e o prompt é o mesmo.
   - **#19** é a rodada 3, inválida (limite de gasto do Gemini, notas ~0.51).
@@ -123,7 +123,7 @@ A análise dos comentários dos juízes está em `docs/analise-avaliacao-v2.md`.
 ### Pré-requisitos
 
 - Python 3.10 ou superior
-- Conta no [LangSmith](https://smith.langchain.com) com API key e um **handle público** (ver `docs/langsmith-hub-username.md`)
+- Conta no [LangSmith](https://smith.langchain.com) com API key e um **handle público** (o username do Hub). Ele só existe depois de tornar um prompt público: em LangSmith > Prompts, abra um prompt, menu dos três pontinhos > "Make Public" e defina o handle (é definitivo)
 - Uma chave de LLM (Google Gemini ou OpenAI) **ou** o [Ollama](https://ollama.com) instalado
 
 ### Instalação

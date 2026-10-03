@@ -90,11 +90,12 @@ Validar com `pytest tests/test_prompts.py`.
   - **A) Técnicas Aplicadas (Fase 2):** técnicas escolhidas, justificativa e exemplos práticos de cada uma.
   - **B) Resultados Finais:** link público do dataset de avaliação, screenshots com as notas ≥ 0.8, e comparação v1 vs v2 (o que mudou e por quê). Registrar também por que o Gemini foi trocado pelo Ollama e quais modelos foram usados.
   - **C) Como Executar:** pré-requisitos, dependências e comandos de cada fase.
-- ⏳ **Evidências no LangSmith:**
+- 🔄 **Evidências no LangSmith:**
   - Dataset de avaliação com 15 exemplos.
   - Execuções do v2 com notas ≥ 0.8.
   - Tracing detalhado de pelo menos 3 exemplos.
-  - Link público gerado com `Client().share_dataset(dataset_name="<LANGSMITH_PROJECT>-eval")["url"]`. Rodar uma vez e guardar o endereço, porque o link muda a cada compartilhamento.
+  - ✅ **Link público gerado** (3 out 2026, com autorização do usuário): https://smith.langchain.com/public/38a6af54-346e-40a0-bc0a-8997dc790cf8/d. Dataset com 15 exemplos; prompt `brunousml/bug_to_user_story_v2` confirmado como público. O link expõe também os experimentos reprovados e a rodada 3 inválida do Gemini. **Não rodar `share_dataset` de novo:** o link muda.
+  - Como foi gerado: `Client().share_dataset(dataset_name="<LANGSMITH_PROJECT>-eval")["url"]`. Original do plano: `Client().share_dataset(dataset_name="<LANGSMITH_PROJECT>-eval")["url"]`. Rodar uma vez e guardar o endereço, porque o link muda a cada compartilhamento.
 - ⏳ **Repositório público** com todo o código, o `v2.yml` completo e o README atualizado.
 - **Cuidado com screenshots:** as imagens do LangSmith mostram e-mail e ID da organização na barra lateral. Recortar ou borrar antes de colocá-las no README, que é público.
 

@@ -106,7 +106,9 @@ A análise dos comentários dos juízes está em `docs/analise-avaliacao-v2.md`.
 
 - Dataset de avaliação: `{LANGSMITH_PROJECT}-eval`, com 15 exemplos.
 - Experimentos do v2 com Gemini: `0ac5088d-b499-4b49-b815-9f9e4f292f5f` (rodada 1) e `f3b79d64-879e-44c0-8c6f-2a8a4e345ced` (rodada 2).
-- Link público do dataset: _a preencher após `share_dataset` (ver "Como Executar")._
+- Link público do dataset (15 exemplos e os experimentos): https://smith.langchain.com/public/38a6af54-346e-40a0-bc0a-8997dc790cf8/d
+  - O link expõe todos os experimentos do dataset, inclusive os reprovados (Ollama, iterações 1 e 2) e a rodada 3 do Gemini, inválida por limite de gasto (`feb6084d-5c71-4a22-a971-c22425ced9da`).
+- Prompt público no Hub: `brunousml/bug_to_user_story_v2`.
 - Screenshots das notas: _a adicionar em `screenshots/`._
 
 ## C) Como Executar

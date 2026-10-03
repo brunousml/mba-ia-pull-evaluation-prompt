@@ -96,6 +96,7 @@ Validar com `pytest tests/test_prompts.py`.
   - Tracing detalhado de pelo menos 3 exemplos.
   - ✅ **Link público gerado** (3 out 2026, com autorização do usuário): https://smith.langchain.com/public/38a6af54-346e-40a0-bc0a-8997dc790cf8/d. Dataset com 15 exemplos; prompt `brunousml/bug_to_user_story_v2` confirmado como público. O link expõe também os experimentos reprovados e a rodada 3 inválida do Gemini. **Não rodar `share_dataset` de novo:** o link muda.
   - Como foi gerado: `Client().share_dataset(dataset_name="<LANGSMITH_PROJECT>-eval")["url"]`. Original do plano: `Client().share_dataset(dataset_name="<LANGSMITH_PROJECT>-eval")["url"]`. Rodar uma vez e guardar o endereço, porque o link muda a cada compartilhamento.
+- ✅ **Push feito** (branch `docs/adiciona-documentacao` em dia com a origin, último commit `4cde0b0`).
 - ⏳ **Repositório público** com todo o código, o `v2.yml` completo e o README atualizado.
 - **Cuidado com screenshots:** as imagens do LangSmith mostram e-mail e ID da organização na barra lateral. Recortar ou borrar antes de colocá-las no README, que é público.
 

@@ -109,7 +109,14 @@ A análise dos comentários dos juízes está em `docs/analise-avaliacao-v2.md`.
 - Link público do dataset (15 exemplos e os experimentos): https://smith.langchain.com/public/38a6af54-346e-40a0-bc0a-8997dc790cf8/d
   - O link expõe todos os experimentos do dataset, inclusive os reprovados (Ollama, iterações 1 e 2) e a rodada 3 do Gemini, inválida por limite de gasto (`feb6084d-5c71-4a22-a971-c22425ced9da`).
 - Prompt público no Hub: `brunousml/bug_to_user_story_v2`.
-- Screenshots das notas: _a adicionar em `screenshots/`._
+- Screenshot da tabela de experimentos do dataset público (`docs/img/dataset-publico.png`):
+
+  ![Experimentos no dataset público](docs/img/dataset-publico.png)
+
+  - **#17 e #18** são as rodadas válidas do v2 com Gemini (médias 0.9295 e 0.9240, todas as métricas ≥ 0.8). O revision `4df0a28` é o commit do prompt avaliado; o `f854604-dirty` do #18 é só o estado do repositório na hora da execução, e o prompt é o mesmo.
+  - **#19** é a rodada 3, inválida (limite de gasto do Gemini, notas ~0.51).
+  - **#10 a #16** são as rodadas com o juiz Ollama, mais rigoroso, das iterações 1 e 2.
+  - A captura mostra só a lista de experimentos. Os traces por exemplo estão no link público, dentro de cada experimento.
 
 ## C) Como Executar
 

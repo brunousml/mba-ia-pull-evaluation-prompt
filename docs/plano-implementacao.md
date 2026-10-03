@@ -86,7 +86,7 @@ Validar com `pytest tests/test_prompts.py`.
 
 ## Entregável ⏳
 
-- ⏳ **README.md** com as três seções exigidas:
+- ✅ **README.md** escrito (seções A, B e C; pendentes só o link público e os screenshots, que dependem de ação sua):
   - **A) Técnicas Aplicadas (Fase 2):** técnicas escolhidas, justificativa e exemplos práticos de cada uma.
   - **B) Resultados Finais:** link público do dataset de avaliação, screenshots com as notas ≥ 0.8, e comparação v1 vs v2 (o que mudou e por quê). Registrar também por que o Gemini foi trocado pelo Ollama e quais modelos foram usados.
   - **C) Como Executar:** pré-requisitos, dependências e comandos de cada fase.

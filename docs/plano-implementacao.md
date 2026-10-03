@@ -56,12 +56,20 @@ A numeração dos requisitos segue o README (seção "Requisitos"). Ordem de exe
 - ✅ **3 rodadas extras (Ollama):** média das 3 = Helpfulness 0.813, Correctness 0.803, F1 0.803, Clarity 0.820, Precision 0.807, **média geral 0.809**. Rodadas: 0.8119 (reprovada por F1 < 0.8), 0.8090 e 0.8057 (aprovadas). Das 4 execuções, 3 aprovaram. Margem de ~0.003, do tamanho da variação entre rodadas (~0.01).
 - ✅ **Análise dos comentários dos juízes e ajustes propostos** em `docs/analise-avaliacao-v2.md`. Padrões: elaboração além do relato, persona diferente da esperada, meta trocada pelo sintoma, bug complexo sem seções de tasks e métricas.
 - ❌ **Iteração 1 (ajustes A1 a A4 aplicados, commit `4427df5`): reprovou nas 3 rodadas.** Médias: Helpfulness 0.843, Correctness 0.793, F1 **0.750**, Clarity 0.843, Precision 0.843, média geral 0.816. Precision, Clarity e Helpfulness subiram; F1 caiu 0.053 e levou Correctness abaixo de 0.8. Ganhos em bugs simples e no webhook; perdas de recall nos médios e complexos (sugestões técnicas e seções de prevenção/tasks omitidas). Hipótese: A3 e A1 podaram demais. Detalhes em `docs/analise-avaliacao-v2.md`, seções 6 e 7.
-- ⚠️ **O Hub está com a versão da iteração 1 (reprovada).** A linha de base (aprovada em 2 de 3 rodadas, média 0.809) está no commit `d13e0de`.
-- ⏳ **Iteração 2:** relaxar A3 para médios, restringir A1 aos simples, aplicar A6 e A7 nos complexos, publicar e rodar 3 avaliações (proposta na seção 7 da análise).
+- ✅ **Iteração 2 (commit `4df0a28`): reprovou nas 3 rodadas (Ollama).** Médias aproximadas: Helpfulness ~0.800, Correctness ~0.787, F1 ~0.793, Clarity ~0.813, Precision ~0.780, **média geral 0.795** (rodadas: 0.8035, 0.7923, 0.7890). O F1 se recuperou (0.750 → ~0.793), confirmando que A3 e A1 podaram demais, mas Precision caiu de 0.843 para ~0.780 e anulou os ganhos da iteração 1. Pior que a linha de base (0.809) e que a iteração 1 (0.816). Nenhuma variação do v2 fechou todas as métricas ≥ 0.8 de forma estável; a linha de base (`d13e0de`) é a única que aprovou (2 de 3 rodadas).
+- ✅ **Hub:** já contém a versão da iteração 2. O `push_prompts.py` retornou `409 Nothing to commit`, então o conteúdo local e o do Hub são iguais (conferido só por esse retorno).
+- ⚠️ **Gemini como juiz:** `gemini-3.5-flash-lite` devolve `content` como lista de blocos (inclui `extras.signature`), e `output_version='v0'` não resolve. `gemini-2.5-flash` devolve string e funciona com o `metrics.py` sem alteração. Testado com uma chamada isolada.
+- ✅ **Avaliação só com Gemini (`gemini-2.5-flash` como gerador e juiz), prompt da iteração 2:** via variáveis de ambiente (o `.env` segue apontando para o Ollama).
+  - **Rodada 1: aprovada.** Helpfulness 0.96, Correctness 0.91, F1 0.85, Clarity 0.95, Precision 0.98, média **0.9295**. Experimento `0ac5088d-b499-4b49-b815-9f9e4f292f5f`.
+  - **Rodada 2: aprovada.** 0.95, 0.91, 0.86, 0.93, 0.96, média **0.9240**. Experimento `f3b79d64-879e-44c0-8c6f-2a8a4e345ced`.
+  - **Rodada 3: inválida.** O projeto do Google AI Studio atingiu o **limite de gasto mensal** (`429 RESOURCE_EXHAUSTED`); todas as chamadas dos juízes falharam e as notas ~0.51 são o fallback (média 0.5125). Não reflete o prompt. Experimento `feb6084d-5c71-4a22-a971-c22425ced9da` ficou no dataset com essas notas.
+  - **Consequência:** não é possível rodar mais avaliações com Gemini até o limite ser liberado (https://ai.studio/spend). Há 2 rodadas válidas, ambas aprovadas, contra 3 pedidas.
+  - O juiz Gemini é bem mais brando que o Ollama (~0.93 contra ~0.80 para o mesmo prompt), então as notas não são comparáveis entre os dois juízes.
+- ✅ **Decisão (iteração 3):** não é necessária com o juiz Gemini, porque o prompt da iteração 2 já aprova com folga (média ~0.93). Mantém-se o `v2.yml` atual.
 - ⏳ Guardar o link do experimento e screenshots das notas, para o README.
 - **Observação:** o log mostra `Erro ao parsear JSONL ... line 1 column 2` na leitura local do `datasets/bug_to_user_story.jsonl` (arquivo que não pode ser alterado). Não afetou a nota, porque o dataset `{LANGSMITH_PROJECT}-eval` já existia no LangSmith com os 15 exemplos. Só atrapalharia quem recriasse o dataset do zero.
 
-## Requisito 5: testes de validação ⏳
+## Requisito 5: testes de validação ✅
 
 Implementar em `tests/test_prompts.py`, mantendo os nomes do esqueleto. Todos carregam o `v2` e desembrulham a chave:
 
@@ -73,6 +81,8 @@ Implementar em `tests/test_prompts.py`, mantendo os nomes do esqueleto. Todos ca
 6. `test_minimum_techniques`: `techniques_applied` tem pelo menos 2 itens.
 
 Validar com `pytest tests/test_prompts.py`.
+
+- ✅ **Implementado** (commit `f854604`): os 6 testes do README, mais `test_prompt_structure_is_valid` (reaproveita `validate_prompt_structure`). Usam uma fixture que carrega o `v2.yml` e desembrulha a chave raiz. `pytest tests/test_prompts.py`: **7 passed**.
 
 ## Entregável ⏳
 
@@ -94,4 +104,4 @@ Validar com `pytest tests/test_prompts.py`.
 2. Refatorar o `v2.yml` ✅
 3. `python src/push_prompts.py` ✅
 4. `python src/evaluate.py` 🔄 (1ª rodada com Ollama aprovada, falta confirmar estabilidade)
-5. `pytest tests/test_prompts.py` ⏳
+5. `pytest tests/test_prompts.py` ✅
